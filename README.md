@@ -63,4 +63,7 @@ Tech Description
 ---
 
 👤 Author
+
 **Aryan Deshmukh**
+
+🔗 [LinkedIn](https://www.linkedin.com/in/aryan-deshmukh-0531321b6) | 💻 [GitHub](https://github.com/ColonialCreature)
