@@ -1,0 +1,51 @@
+import cv2
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
+
+# Your Gmail credentials
+sender_email = "colonial.raspi@gmail.com"
+app_password = "ycadmehsmkjsyydq"
+
+# Recipient email
+recipient_email = "202000584@vupune.ac.in"
+
+# Email content
+subject = "Image from USB Webcam"
+message = "This is an image captured from your USB webcam."
+
+# Capture an image from the USB webcam
+camera = cv2.VideoCapture(0)  # Use 0 for the default webcam
+ret, image = camera.read()
+camera.release()
+
+# Create the email message
+msg = MIMEMultipart()
+msg["From"] = sender_email
+msg["To"] = recipient_email
+msg["Subject"] = subject
+msg.attach(MIMEText(message, "plain"))
+
+# Attach the captured image to the email
+cv2.imwrite("captured_image.jpg", image)  # Save the image to a file
+with open("captured_image.jpg", "rb") as image_file:
+    image = MIMEImage(image_file.read())
+    image.add_header("Content-Disposition", "attachment", filename="captured_image.jpg")
+    msg.attach(image)
+
+# Establish a connection to the Gmail SMTP server
+try:
+    server = smtplib.SMTP("smtp.gmail.com", 587)
+    server.starttls()
+    server.login(sender_email, app_password)
+
+    # Send the email
+    server.sendmail(sender_email, recipient_email, msg.as_string())
+    server.quit()
+
+    print("Email with image sent successfully")
+
+except Exception as e:
+    print("Email could not be sent. Error:", str(e))
+

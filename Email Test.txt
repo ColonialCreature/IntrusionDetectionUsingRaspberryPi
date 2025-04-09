@@ -1,0 +1,36 @@
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+# Your Gmail credentials
+sender_email = "colonial.raspi@gmail.com"
+app_password = "ycadmehsmkjsyydq"
+
+# Recipient email
+recipient_email = "202000584@vupune.ac.in"
+
+# Email content
+subject = "Test Email"
+message = "This is a test email from your Raspberry Pi."
+
+# Create the email message
+msg = MIMEMultipart()
+msg["From"] = sender_email
+msg["To"] = recipient_email
+msg["Subject"] = subject
+msg.attach(MIMEText(message, "plain"))
+
+# Establish a connection to the Gmail SMTP server
+try:
+    server = smtplib.SMTP("smtp.gmail.com", 587)
+    server.starttls()
+    server.login(sender_email, app_password)
+
+    # Send the email
+    server.sendmail(sender_email, recipient_email, msg.as_string())
+    server.quit()
+
+    print("Email sent successfully")
+
+except Exception as e:
+    print("Email could not be sent. Error:", str(e))

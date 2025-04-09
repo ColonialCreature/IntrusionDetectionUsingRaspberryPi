@@ -1,0 +1,25 @@
+import RPi.GPIO as GPIO
+import time
+
+# Set the GPIO mode to BCM
+GPIO.setmode(GPIO.BCM)
+
+# Define the GPIO pin for the laser module
+laser_pin = 18
+
+# Set the laser_pin as an output
+GPIO.setup(laser_pin, GPIO.OUT)
+
+try:
+    while True:
+        print("Laser ON")
+        GPIO.output(laser_pin, GPIO.HIGH)  # Turn the laser ON
+        time.sleep(2)  # Keep the laser ON for 2 seconds
+
+        print("Laser OFF")
+        GPIO.output(laser_pin, GPIO.LOW)  # Turn the laser OFF
+        time.sleep(2)  # Keep the laser OFF for 2 seconds
+
+except KeyboardInterrupt:
+    GPIO.cleanup()
+

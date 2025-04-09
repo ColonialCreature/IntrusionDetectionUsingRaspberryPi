@@ -1,0 +1,71 @@
+import RPi.GPIO as GPIO
+import time
+import cv2
+import smtplib
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+# GPIO pin connected to the PIR sensor's OUT pin
+PIR_PIN = 17
+
+# Email settings
+SMTP_SERVER = 'smtp.gmail.com'  # Gmail's SMTP server
+SMTP_PORT = 587  # Port for TLS
+SMTP_USERNAME = 'colonial.raspi@gmail.com'
+SMTP_APP_PASSWORD = 'ycadmehsmkjsyydq'  # Generate an App Password from your Google account
+RECIPIENT_EMAIL = '202000584@vupune.ac.in'
+
+def send_email(image_path):
+    msg = MIMEMultipart()
+    msg['From'] = SMTP_USERNAME
+    msg['To'] = RECIPIENT_EMAIL
+    msg['Subject'] = 'Intrusion Detected'
+
+    text = MIMEText('Motion detected. Images attached.')
+    msg.attach(text)
+
+    with open(image_path, 'rb') as fp:
+        img = MIMEImage(fp.read())
+        msg.attach(img)
+
+    server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+    server.starttls()
+    server.login(SMTP_USERNAME, SMTP_APP_PASSWORD)
+    server.sendmail(SMTP_USERNAME, RECIPIENT_EMAIL, msg.as_string())
+    server.quit()
+
+def main():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(PIR_PIN, GPIO.IN)
+    
+    try:
+        print("Intrusion Detection System Running...")
+        while True:
+            if GPIO.input(PIR_PIN):
+                print("Motion detected!")
+                timestamp = time.strftime("%Y%m%d%H%M%S")
+                image_path = f"/home/pi_{timestamp}.jpg"
+                
+                # Initialize the camera
+                camera = cv2.VideoCapture(0)
+                time.sleep(2)  # Warm-up time
+
+                # Capture an image
+                ret, frame = camera.read()
+                if ret:
+                    cv2.imwrite(image_path, frame)
+                    camera.release()
+                    send_email(image_path)
+                    time.sleep(10)  # Wait 10 seconds before rearming the sensor
+                else:
+                    print("Failed to capture image.")
+                
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Exiting...")
+        GPIO.cleanup()
+
+if __name__ == '__main__':
+    main()
+
